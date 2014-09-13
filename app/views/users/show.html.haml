@@ -1,0 +1,18 @@
+%p#notice= notice
+%p
+  %strong F name:
+  = @user.f_name
+%p
+  %strong L name:
+  = @user.l_name
+%p
+  %strong Dob:
+  = @user.dob
+= link_to 'Edit', edit_user_path(@user)
+|
+\#{link_to 'Back', users_path}
+
+= form_for @new_membership do |f|
+  = f.label :club
+  %br
+  = f.checkbox :club
