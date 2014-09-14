@@ -1,3 +1,4 @@
-%a{href: users_path} Click here to see the USERS!
-%br
-%a{href: clubs_path} Click here to see the CLUBS!
+- if user_signed_in?
+	%a{href: users_path} Click here to see the USERS!
+	%br
+	%a{href: clubs_path} Click here to see the CLUBS!
