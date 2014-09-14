@@ -1,0 +1,24 @@
+= form_for(@club) do |f|
+  - if @club.errors.any?
+    #error_explanation
+      %h2
+        = pluralize(@club.errors.count, "error")
+        prohibited this club from being saved:
+      %ul
+        - @club.errors.full_messages.each do |message|
+          %li= message
+  .field
+    = f.label :name
+    %br/
+    = f.text_field :name
+  .field
+    = f.label :description
+    %br/
+    = f.text_field :description
+  .field
+    = f.label :accepting
+    %br/
+    = f.check_box :accepting
+  .actions
+    = f.hidden_field :created_by, :value => current_user.id
+    = f.submit
