@@ -2,8 +2,8 @@ About
 ===
 Built in response to a coding test for the University of Notre Dame.
 
->Write a Ruby on Rails app that lets me track club memberships.  Scaffolding is fine; SQLite is fine. Do as much as you can in this hour, prioritizing items as you see fit.  Use GitHub. When you're done, provide me the repo URL, plus instructions on how to run the app, and be prepared to discuss your work.  
->*Classes*
+> Write a Ruby on Rails app that lets me track club memberships.  Scaffolding is fine; SQLite is fine. Do as much as you can in this hour, prioritizing items as you see fit.  Use GitHub. When you're done, provide me the repo URL, plus instructions on how to run the app, and be prepared to discuss your work.  
+> *Classes*
 - Clubs should have names, descriptions, and an attribute that states whether they are currently accepting members.  
 - Users should have first / last names and date of birth.  
 - Users may belong to more than one club.  
