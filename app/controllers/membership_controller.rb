@@ -2,6 +2,10 @@ class MembershipsController < ApplicationController
 
 	def create
 		@new_membership = Membership.new(membership_params)
+
+	end
+
+	def destroy
 	end
 
 

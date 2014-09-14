@@ -42,8 +42,10 @@ class UsersController < ApplicationController
   # PATCH/PUT /users/1
   # PATCH/PUT /users/1.json
   def update
+    debugger
     respond_to do |format|
       if @user.update(user_params)
+        debugger
         format.html { redirect_to @user, notice: 'User was successfully updated.' }
         format.json { render :show, status: :ok, location: @user }
       else
@@ -71,6 +73,7 @@ class UsersController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def user_params
+      debugger
       params.require(:user).permit(:f_name, :l_name, :dob)
     end
 end

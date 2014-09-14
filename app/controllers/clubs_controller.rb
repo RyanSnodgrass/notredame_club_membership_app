@@ -19,6 +19,7 @@ class ClubsController < ApplicationController
 
   # GET /clubs/1/edit
   def edit
+    @users = User.all
   end
 
   # POST /clubs
