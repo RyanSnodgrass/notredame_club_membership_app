@@ -14,7 +14,7 @@ Built in response to a coding test for the University of Notre Dame.
 *Testing*
 - Write tests for your app in whatever framework you prefer
 
-*View Layer*
+> *View Layer*
 - Clean up the scaffolding to eliminate unnecessary fields
 - Provide drop-downs for field values where appropriate.
 - On the club page, display a bulleted list of club member names.
