@@ -1,0 +1,44 @@
+!!!
+%html
+  %head
+    %title NotredameClubMembershipApp
+    = stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true
+    = javascript_include_tag 'application', 'data-turbolinks-track' => true
+    = csrf_meta_tags
+  %body
+    %ul.nav.navbar-nav
+      - if user_signed_in?
+        %li
+          %a.smothscroll.navbar-link{href: edit_user_registration_path} Edit Profile
+        %li
+          = link_to "Logout", destroy_user_session_path, method: :delete, :class => 'smoothscroll'
+        %li
+          %h4.logged-header
+            Logged in as #{current_user.email}
+          / %a.smothscroll{href: destroy_user_session_path, method: :delete} Logout
+      - else
+        %li
+          = link_to "Sign up", new_user_registration_path, :class => 'navbar-link'
+        %li
+          = link_to "Login", new_user_session_path, :class => 'navbar-link' 
+    / - if user_signed_in?
+    /   %ul.nav.navbar-nav.navbar-right
+    /     %li
+    /       %h4.logged-header
+    /         Logged in as #{current_user.email}
+
+
+
+  #headerwrap
+    .notice-tags
+      - if notice != nil
+        %p.notice= notice
+      - if alert != nil       
+        %p.alert= alert
+      / - if user_signed_in?
+      /   = link_to 'Edit profile', edit_user_registration_path, :class => 'navbar-link'
+      /   = link_to "Logout", destroy_user_session_path, method: :delete, :class => 'navbar-link'
+      / - else
+      /   = link_to "Sign up", new_user_registration_path, :class => 'navbar-link'
+      /   = link_to "Login", new_user_session_path, :class => 'navbar-link'
+    = yield
