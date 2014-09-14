@@ -69,6 +69,6 @@ class ClubsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def club_params
-      params.require(:club).permit(:name, :description, :accepting)
+      params.require(:club).permit(:name, :description, :accepting, :created_by)
     end
 end
