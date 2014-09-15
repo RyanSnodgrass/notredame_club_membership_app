@@ -3,14 +3,17 @@
 %ul
   - @users.each do |u|
     %li= u.f_name + " " + u.l_name
-    - if @club.memberships.include?(u)
+    - if @club.users.include?(u)
     
       %h5 Current Member
-      = link_to 'Expell Member', club_membership_path, :method => :delete
+      / = form_for([@club, @membership]) do |f|
+      /   = f.hidden_field :user_id, :value => u.id
+      /   = f.hidden_field :club_id, :value => @club.id
+      /   = f.submit 'Expell Member'
     - else
       %h5 Not a Member
       / = link_to 'Invite Member', club_memberships_path(:club_id => params[:id], :user_id => u.id), :method => :post
-      = form_for([@club,@new_membership]) do |f|
+      = form_for([@club, @new_membership]) do |f|
         = f.hidden_field :user_id, :value => u.id
         = f.hidden_field :club_id, :value => @club.id
         = f.submit 'Invite Member'
