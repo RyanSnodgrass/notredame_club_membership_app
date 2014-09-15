@@ -51,18 +51,18 @@ The next thing I tackled in that hour was verification of unique users. I had fo
 Next task was to get the Membership table working.
 ```ruby
 class Club < ActiveRecord::Base
-	has_many :memberships
-	has_many :users, through: :memberships
+  has_many :memberships
+  has_many :users, through: :memberships
 end
 
 class Membership < ActiveRecord::Base
-	belongs_to :user
-	belongs_to :club
+  belongs_to :user
+  belongs_to :club
 end
 
 class User < ActiveRecord::Base
-	has_many :memberships
-	has_many :clubs, through: :memberships
+  has_many :memberships
+  has_many :clubs, through: :memberships
 end
 ```
 
@@ -199,14 +199,14 @@ First thing we need to is add a way to view all users on the view layer. Only th
 = render 'form'
 
 - @users.each do |u|
-	= u.f_name
-	= u.l_name
-	- if @club.memberships.include?(u)
-		%h5 Current Member
-		= link_to 'Expell Member', club_membership_path(:id => u.id), :method => :delete
-	- else
-		%h5 Not a Member
-		= link_to 'Invite Member', club_memberships_path(:id => u.id), :method => :post
+  = u.f_name
+  = u.l_name
+  - if @club.memberships.include?(u)
+    %h5 Current Member
+    = link_to 'Expell Member', club_membership_path(:id => u.id), :method => :delete
+  - else
+    %h5 Not a Member
+    = link_to 'Invite Member', club_memberships_path(:id => u.id), :method => :post
 
 
 = link_to 'Show', @club
