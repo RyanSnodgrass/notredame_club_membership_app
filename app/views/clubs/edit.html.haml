@@ -1,23 +1,35 @@
 %h1 Editing club
 = render 'form'
 %ul
-  - @users.each do |u|
-    %li= u.f_name + " " + u.l_name
-    - if @club.users.include?(u)
+  %h3 List of Current Members
+  - @memberships.each do |m|
+    %li= m.user.f_name + " " + m.user.l_name + ' Current Member'
+    = form_for(m, url: club_membership_path(@club, m), :html => {:method => 'delete'}) do |f|
+      = f.hidden_field :club_id, :value => @club.id
+      = f.submit 'Expell Member'
     
-      %h5 Current Member
-      / = form_for([@club, @membership]) do |f|
-      /   = f.hidden_field :user_id, :value => u.id
-      /   = f.hidden_field :club_id, :value => @club.id
-      /   = f.submit 'Expell Member'
-    - else
+    %br
+
+  %h3 List of Non Members
+  - @users.each do |u|
+    - unless @club.users.include?(u)
+      %li= u.f_name + " " + u.l_name
       %h5 Not a Member
-      / = link_to 'Invite Member', club_memberships_path(:club_id => params[:id], :user_id => u.id), :method => :post
+
       = form_for([@club, @new_membership]) do |f|
         = f.hidden_field :user_id, :value => u.id
         = f.hidden_field :club_id, :value => @club.id
         = f.submit 'Invite Member'
 
+      / = link_to 'Invite Member', club_memberships_path(:club_id => params[:id], :user_id => u.id), :method => :post
+      / = link_to 'Expell Member', as: :delete club_memberships_path(:club_id => params[:id], :user_id => u.id), :method => :destroy
+      
+      / = form_for([:delete, :club, @membership], url: club_membership_path(params[:id])) do |f|
+      /   = f.hidden_field :user_id, :value => u.id
+      /   = f.hidden_field :club_id, :value => @club.id
+      /   = f.submit 'Expell Member'
+      / = link_to 'Expell Member', url: , method: :delete, data: { confirm: 'Are you sure?' }
+      / = button_to "Expell Member", { action: "destroy", id: @club.id }, method: :delete, data: { confirm: "Are you sure?" }
 
 = link_to 'Show', @club
 = link_to 'Back', clubs_path

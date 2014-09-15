@@ -47,6 +47,7 @@ During Code Test
 
 I was given a short hour to get as far as I could.
 
+####Setup
 Initially I set up a basic schmema
 ```ruby
   create_table "clubs", force: true do |t|
@@ -84,6 +85,7 @@ class User < ActiveRecord::Base
 end
 ```
 
+####Scaffolding
 I ran a couple of scaffolding commands that got Users and Clubs to CRUD(Create, Read, Update, Delete.) I normally don't use scaffolding as I prefer to know what goes into my app, but in the interest of time I let it slide. Problem is that scaffolding generates alot of stuff you dont need. Let's take clubs for example
 ```ruby
 class ClubsController < ApplicationController
@@ -164,7 +166,7 @@ end
 ```
 Now, actually most of that stuff is pretty good. I actually like the `set_club` method. It defines the `@club = Club.find(params[:id])` variable once and then calls it before the `edit`, `show`, `update`, and `delete` pages. I have a lot of apps where I'm writing that line over and over- I might just start using that.
 
-What I don't like, or need, is all those json responses. I believe that eventually all apps are going over to a rails/django/node backend and an angular/backbone frontend. But not yet. Right now I can clean up that scaffolding for the `create`, `update`, and `destroy` methods by simply removing the json responses.
+What I don't like, or need, is all those json responses. I believe that eventually all apps are going over to a rails/django/node backend and a seperate angular/backbone frontend. But not yet. Right now I can clean up that scaffolding for the `create`, `update`, and `destroy` methods by simply removing the json responses.
 
 ```ruby
 def create
@@ -193,14 +195,15 @@ Much prettier.
 
 ---
 
+####Verification of Uniqueness
 The next thing I tackled in that hour was verification of unique users. I had found that I could get all fields unique apart from each other. But, that's not very useful as there are of course people with similar first names and so on. I used the `validates :l_name, :uniqueness => { :scope => :f_name, :case_sensitive => false }` method to find uniqueness on two fields. _Still working on 3._
 
 ---
 
+####Membership Association
 Next task was to get the Membership table working.
 
-
-Through the rails console I can test `has_many through:` relationship
+Through the rails console I can test `has_many :objects, through: :object` relationship
 ```ruby
 2.1.1 :001 > User.first
  => #<User id: 1, f_name: "Ryan", l_name: "Snodgrass", dob: "1986-04-28">
@@ -208,7 +211,9 @@ Through the rails console I can test `has_many through:` relationship
  => #<ActiveRecord::Associations::CollectionProxy []>
 2.1.1 :003 > Club.first
  => #<Club id: 3, name: "club", description: "skdj", accepting: true>
-2.1.1 :004 > Club.first.users
+2.1.1 :004 > Club.first.memberships
+ => #<ActiveRecord::Associations::CollectionProxy []>
+2.1.1 :005 > Club.first.users
  => #<ActiveRecord::Associations::CollectionProxy []>
  ```
  
@@ -216,7 +221,7 @@ I see that calling through clubs to users and vice versa will not error out. Whi
 
 Additions
 ---
-On my own time I decided to keep adding. I wanted users to sign up and be able to create a club. Only the user that creates the club can make changes. I will be using the [devise gem](https://github.com/plataformatec/devise) for authentication and the [cancancan gem](https://github.com/CanCanCommunity/cancancan) for user permissions.
+Over the weekend on my own time I decided to keep adding. I wanted users to sign up and be able to create a club. Only the user that creates the club can make changes. I will be using the [devise gem](https://github.com/plataformatec/devise) for authentication and the [cancancan gem](https://github.com/CanCanCommunity/cancancan) for user permissions.
 
 ###Devise Gem
 
@@ -230,6 +235,7 @@ User Load (0.2ms)  SELECT  "users".* FROM "users"  WHERE "users"."id" = 5  ORDER
 
 Normally a pretty easy error. I might have missed the defined parameters in the users_controller or something simple like that. But - 
 ```ruby
+#app/controllers/users_controller.rb
 def create
     @user = User.new(user_params)
     respond_to do |format|
@@ -247,12 +253,13 @@ def user_params
   params.require(:user).permit(:f_name, :l_name, :dob)
 end
 ```
-Nope. Strangely all the unpermitted items were there but, none of the `password` or `email` that IS going through. Even stranger - debugger is completely being ignored. Which tells me that the user controller isn't even being hit.
+Nope all there. Strangely all the unpermitted items were there, but none of the `password` or `email` that _IS_ going through. Even stranger - debugger is completely being ignored. Which tells me that the UserController isn't even being hit.
 
-If we look closely at the console output we can see that it tells us that `Processing by Devise::RegistrationsController#update` is where it is actually processing. But where is that? I scoured my source files and cant find that specific controller. 
+If we look closely at the console output we can see that it tells us `Processing by Devise::RegistrationsController#update` is where it is actually processing. But where is that? The source files do not contain that specific controller. 
 
-Devise's documentation tells us that to add new attributes to a form- put in a specific method in the application controller. So I tried- 
+Fortunately Devise's documentation tells us (right on the front page) that to add new attributes to a form- put in their `configure_permitted_parameters` method in the application controller. So I tried- 
 ```ruby
+#app/controllers/application_controller.rb
 class ApplicationController < ActionController::Base
   before_action :configure_permitted_parameters, if: :devise_controller?
 
@@ -263,14 +270,15 @@ class ApplicationController < ActionController::Base
 end
 ```
 
-AND IT WORKED. Problem solved!
+And the error went away! Problem solved!
 
 ###User Permissions
-For a little bit extra I just want a simple check that only the user that started the club may edit and add members. Normally I would use a foriegn key with a `belongs_to :user` but, that might not work as I'm already associating users with memberships. Instead I'll have a column `created_by` with foriegn keys and upon club creation save the `current_user.id` in the column. Reference that when checking whether `current_user.id == @club.created_by`. I've used the CanCanCan gem before and it works awesome but, in this case I feel it would be a little bit of over kill when in about 3 seconds I can just write a little bit of logic to check user permissions.
+For a little bit extra I just want a simple check that only the user that started the club may edit and add members. Normally I would use a foriegn key with a `belongs_to :user` but, that might not work as I'm already associating users with memberships. Instead I'll have a column `created_by` with foriegn keys and upon club creation save the `current_user.id` in the column. Reference that when checking whether `current_user.id == @club.created_by`. I've used the CanCanCan gem before with awesome results but, in this case I feel it would be a little bit of over-kill when in about 3 seconds I can just write a little bit of logic to check user permissions.
 
 First thing, I need to add a 'created_by' column in the club table.
-
-`rails g migration AddCreatedByToClubs created_by:integer`
+```
+rails g migration AddCreatedByToClubs created_by:integer
+```
 This creates a migration file and auto generates the add column with what I want in it. Always check anyways and make sure it generated your migration file correctly.
 ```ruby
 class AddCreatedByToClubs < ActiveRecord::Migration
@@ -284,9 +292,9 @@ Looks good.
 rake db:migrate
 ```
 
-In the club form add in `created_by` as a hidden value.
-```
-#app/views/clubs/_form.html.haml
+In the club form add in `created_by` as a hidden value. Because the only user able to update the club is the one who created it, I say it's ok to set the current user in the form template.
+```haml
+/ app/views/clubs/_form.html.haml
 = f.hidden_field :created_by, :value => current_user.id
 ```
 And in the club controller add in the `created_by` column in the salting
@@ -298,9 +306,9 @@ end
 ```
 
 Now let's put in the quick logic.
-```
-#app/views/clubs/index.html.haml
-    - @clubs.each do |club|
+```haml
+/ app/views/clubs/index.html.haml
+- @clubs.each do |club|
   %tr
     %td= club.name
     %td= club.description
@@ -312,9 +320,9 @@ Now let's put in the quick logic.
 ```
 
 Bam! Done.  
-While we're here let's fix the boolean view for `accepting` to something more acceptable. Instead of an input field, I'm gonna make it a simple checkbox.
-```
-#app/views/clubs/_form.html.haml
+While we're here let's fix the input field for `accepting` to something more acceptable since scaffolding auto generates an input text box for a boolean value(lol wut?) I'm gonna make it a simple checkbox.
+```haml
+/ app/views/clubs/_form.html.haml
 = f.label :accepting
 %br/
 = f.check_box :accepting
@@ -322,11 +330,11 @@ While we're here let's fix the boolean view for `accepting` to something more ac
 
 ###Memberships
 
-Now onto the meat of the app. Getting users to associate with clubs. In a real app this would probably be a very involved feature. The club owner could search for users and send a notification to the prospect's email with the invitation. Meanwhile the prospect could shop for other clubs and then send a notification to the club owner for an invitation. There could be growler notifications and popups and recommendations and all very good, but this could go on forever. For now, I just want select users to invite/expell people.
+Now onto the meat of the app. Getting users to associate with clubs. In a real app this would probably be a very involved feature. The club owner could search for users and send a notification to the prospect's email with the invitation. Meanwhile the prospect could shop for other clubs and then send a notification to the club owner for an invitation. There could be growler notifications and popups and recommendations and that's all very good, but this could go on forever. For now, I just want admin users to invite/expell people.
 
-First thing we need to is add a way to view all users on the view layer. Only the club administrator can make changes so I'll simply put the invitation function inside the edit page.   
-```
-#app/views/clubs/edit.html.haml
+First thing we need to do is add a way to view all users on the view layer. Only the club administrator can make changes so I'll simply put the invitation function inside the edit page. For organization they're being listed as two types- those that are members, and those that are not.
+```haml
+/ app/views/clubs/edit.html.haml
 %h1 Editing club
 = render 'form'
 
@@ -335,11 +343,13 @@ First thing we need to is add a way to view all users on the view layer. Only th
   = u.l_name
   - if @club.memberships.include?(u)
     %h5 Current Member
-    = link_to 'Expell Member', club_membership_path(:id => u.id), :method => :delete
+    / logic to expell member.
   - else
     %h5 Not a Member
-    = link_to 'Invite Member', club_memberships_path(:id => u.id), :method => :post
-
+    = form_for([@club, @new_membership]) do |f|
+      = f.hidden_field :user_id, :value => u.id
+      = f.hidden_field :club_id, :value => @club.id
+      = f.submit 'Invite Member'
 
 = link_to 'Show', @club
 = link_to 'Back', clubs_path
@@ -354,6 +364,22 @@ end
 Good stuff.
 
 Now we need to update the membership controller.
-```
-asdf
+```ruby
+class MembershipsController < ApplicationController
+
+  def create
+    @new_membership = Membership.new(membership_params)
+    if @new_membership.save
+      redirect_to edit_club_path(params[:club_id])
+    else
+      redirect_to :back
+    end
+  end
+
+  private
+
+  def membership_params
+    params.require(:membership).permit(:user_id, :club_id)
+  end
+end
 ```

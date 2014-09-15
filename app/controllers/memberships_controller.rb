@@ -19,6 +19,13 @@ class MembershipsController < ApplicationController
 		# @new_membership = Membership.new(membership_params)
 
 	def destroy
+		@membership = Membership.find(params[:id])
+		if @membership.destroy
+			redirect_to edit_club_path(params[:club_id])
+		else
+			redirect_to :back
+		end
+		
 	end
 
 	private
