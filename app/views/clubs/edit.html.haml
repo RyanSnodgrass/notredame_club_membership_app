@@ -1,17 +1,15 @@
 %h1 Editing club
 = render 'form'
-
-= @users.each do |u|
-	= u.f_name
-	= u.l_name
-	- if @club.memberships.include?(u)
-		%h5 Current Member
-		= link_to 'Expell Member', club_membership_path, :method => :delete
-	- else
-		%h5 Not a Member
-		= link_to 'Invite Member', club_memberships_path(:club_id => params[:id], :user_id => u.id), :method => :post
-
+%ul
+  - @users.each do |u|
+    %li= u.f_name + " " + u.l_name
+    - if @club.memberships.include?(u)
+    
+      %h5 Current Member
+      = link_to 'Expell Member', club_membership_path, :method => :delete
+    - else
+      %h5 Not a Member
+      = link_to 'Invite Member', club_memberships_path(:club_id => params[:id], :user_id => u.id), :method => :post
 
 = link_to 'Show', @club
-
 = link_to 'Back', clubs_path
