@@ -44,11 +44,29 @@ Development
 
 During Code Test
 ---
-In just over an hour I had used scaffolding to set up CRUD(Creation, Read, Update, Delete) for User and Club model. Normally I don't use the default scaffolding or generators. I was taught to do everything by hand as it ensured I knew exactly what was going into my app and it; of course, taught me the specifics of how Rails worked. In this instance, time was against me so I leaned on the crutch of scaffolding. However, because I never use scaffolding I didn't know the exact commands which used precious minutes while looking them up. 
 
-The next thing I tackled in that hour was verification of unique users. I had found that I could get all fields unique apart from each other. But, that's not very useful 'cause there are of course people with similar first names and so on. I used the `validates :l_name, :uniqueness => { :scope => :f_name, :case_sensitive => false }` method to find uniqueness on two fields. _Still working on 3._
+I was given a short hour to get as far as I could.
 
-Next task was to get the Membership table working.
+Initially I set up a basic schmema
+```ruby
+  create_table "clubs", force: true do |t|
+    t.string  "name"
+    t.text    "description"
+    t.boolean "accepting"
+  end
+
+  create_table "memberships", force: true do |t|
+    t.integer "club_id"
+    t.integer "user_id"
+  end
+
+  create_table "users", force: true do |t|
+    t.string   "f_name"
+    t.string   "l_name"
+    t.date     "dob"
+  end
+```
+And activerecord associations
 ```ruby
 class Club < ActiveRecord::Base
   has_many :memberships
@@ -66,8 +84,124 @@ class User < ActiveRecord::Base
 end
 ```
 
-Through the rails console I know the `has_many through:` relationship works.
+I ran a couple of scaffolding commands that got Users and Clubs to CRUD(Create, Read, Update, Delete.) I normally don't use scaffolding as I prefer to know what goes into my app, but in the interest of time I let it slide. Problem is that scaffolding generates alot of stuff you dont need. Let's take clubs for example
+```ruby
+class ClubsController < ApplicationController
+  before_action :set_club, only: [:show, :edit, :update, :destroy]
+
+  # GET /clubs
+  # GET /clubs.json
+  def index
+    @clubs = Club.all
+  end
+
+  # GET /clubs/1
+  # GET /clubs/1.json
+  def show
+  end
+
+  # GET /clubs/new
+  def new
+    @club = Club.new
+  end
+
+  # GET /clubs/1/edit
+  def edit
+    @users = User.all
+  end
+
+  # POST /clubs
+  # POST /clubs.json
+  def create
+    @club = Club.new(club_params)
+
+    respond_to do |format|
+      if @club.save
+        format.html { redirect_to @club, notice: 'Club was successfully created.' }
+        format.json { render :show, status: :created, location: @club }
+      else
+        format.html { render :new }
+        format.json { render json: @club.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # PATCH/PUT /clubs/1
+  # PATCH/PUT /clubs/1.json
+  def update
+    respond_to do |format|
+      if @club.update(club_params)
+        format.html { redirect_to @club, notice: 'Club was successfully updated.' }
+        format.json { render :show, status: :ok, location: @club }
+      else
+        format.html { render :edit }
+        format.json { render json: @club.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # DELETE /clubs/1
+  # DELETE /clubs/1.json
+  def destroy
+    @club.destroy
+    respond_to do |format|
+      format.html { redirect_to clubs_url, notice: 'Club was successfully destroyed.' }
+      format.json { head :no_content }
+    end
+  end
+
+  private
+    # Use callbacks to share common setup or constraints between actions.
+    def set_club
+      @club = Club.find(params[:id])
+    end
+
+    # Never trust parameters from the scary internet, only allow the white list through.
+    def club_params
+      params.require(:club).permit(:name, :description, :accepting)
+    end
+end
 ```
+Now, actually most of that stuff is pretty good. I actually like the `set_club` method. It defines the `@club = Club.find(params[:id])` variable once and then calls it before the `edit`, `show`, `update`, and `delete` pages. I have a lot of apps where I'm writing that line over and over- I might just start using that.
+
+What I don't like, or need, is all those json responses. I believe that eventually all apps are going over to a rails/django/node backend and an angular/backbone frontend. But not yet. Right now I can clean up that scaffolding for the `create`, `update`, and `destroy` methods by simply removing the json responses.
+
+```ruby
+def create
+  @club = Club.new(club_params)
+  if @club.save
+    redirect_to @club, notice: 'Club was successfully created.'
+  else
+    render :new
+  end
+end
+  
+def update
+  if @club.update(club_params)
+    redirect_to @club, notice: 'Club was successfully updated.'
+  else
+    render :edit        
+  end
+end
+
+def destroy
+  @club.destroy
+  redirect_to clubs_url, notice: 'Club was successfully destroyed.'
+end
+```
+Much prettier.
+
+---
+
+The next thing I tackled in that hour was verification of unique users. I had found that I could get all fields unique apart from each other. But, that's not very useful as there are of course people with similar first names and so on. I used the `validates :l_name, :uniqueness => { :scope => :f_name, :case_sensitive => false }` method to find uniqueness on two fields. _Still working on 3._
+
+---
+
+Next task was to get the Membership table working.
+
+
+Through the rails console I can test `has_many through:` relationship
+```ruby
 2.1.1 :001 > User.first
  => #<User id: 1, f_name: "Ryan", l_name: "Snodgrass", dob: "1986-04-28">
 2.1.1 :002 > User.first.clubs
@@ -78,9 +212,7 @@ Through the rails console I know the `has_many through:` relationship works.
  => #<ActiveRecord::Associations::CollectionProxy []>
  ```
  
-It doesn't error out. Let's see if we can get it to create a relationship via the console. *Get this working later*
- 
-And that was all the time I had.
+I see that calling through clubs to users and vice versa will not error out. Which means that it should be working correctly. But, before I could test any further, my short hour was over.
 
 Additions
 ---

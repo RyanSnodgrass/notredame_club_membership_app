@@ -27,15 +27,10 @@ class ClubsController < ApplicationController
   # POST /clubs.json
   def create
     @club = Club.new(club_params)
-
-    respond_to do |format|
-      if @club.save
-        format.html { redirect_to @club, notice: 'Club was successfully created.' }
-        format.json { render :show, status: :created, location: @club }
-      else
-        format.html { render :new }
-        format.json { render json: @club.errors, status: :unprocessable_entity }
-      end
+    if @club.save
+      redirect_to @club, notice: 'Club was successfully created.'
+    else
+      render :new
     end
   end
 
