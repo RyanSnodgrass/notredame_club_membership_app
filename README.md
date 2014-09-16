@@ -28,7 +28,7 @@ Built in response to a live coding test for the University of Notre Dame. Limit 
 - On submit, stop me from submitting if the club name is over 30 characters.  Alert me somehow of the problem.
 - As I type, provide an indicator next to the text input that displays the number of characters
 
-So basically I'm gonna build meetup.com
+So basically I'm building meetup.com
 
 Installation
 ===
@@ -166,7 +166,7 @@ end
 ```
 Now, actually most of that stuff is pretty good. I actually like the `set_club` method. It defines the `@club = Club.find(params[:id])` variable once and then calls it before the `edit`, `show`, `update`, and `delete` pages. I have a lot of apps where I'm writing that line over and over- I might just start using that.
 
-What I don't like, or need, is all those json responses. I believe that eventually all apps are going over to a rails/django/node backend and a seperate angular/backbone frontend. But not yet. Right now I can clean up that scaffolding for the `create`, `update`, and `destroy` methods by simply removing the json responses.
+What I don't like, or need, is all those json responses. I believe that eventually all apps are going over to a rails/django/node back-end and a seperate angular/backbone front-end. But not yet. Right now I can clean up that scaffolding for the `create`, `update`, and `destroy` methods by simply removing the json responses.
 
 ```ruby
 def create
@@ -193,17 +193,14 @@ end
 ```
 Much prettier.
 
----
 
 ####Verification of Uniqueness
 The next thing I tackled in that hour was verification of unique users. I had found that I could get all fields unique apart from each other. But, that's not very useful as there are of course people with similar first names and so on. I used the `validates :l_name, :uniqueness => { :scope => :f_name, :case_sensitive => false }` method to find uniqueness on two fields. _Still working on 3._
 
----
-
 ####Membership Association
 Next task was to get the Membership table working.
 
-Through the rails console I can test `has_many :objects, through: :object` relationship
+Through the rails console I can test `has_many :x_objects, through: :y_object` relationship
 ```ruby
 2.1.1 :001 > User.first
  => #<User id: 1, f_name: "Ryan", l_name: "Snodgrass", dob: "1986-04-28">
@@ -219,21 +216,23 @@ Through the rails console I can test `has_many :objects, through: :object` relat
  
 I see that calling through clubs to users and vice versa will not error out. Which means that it should be working correctly. But, before I could test any further, my short hour was over.
 
+---
+
 Additions
 ---
 Over the weekend on my own time I decided to keep adding. I wanted users to sign up and be able to create a club. Only the user that creates the club can make changes. I will be using the [devise gem](https://github.com/plataformatec/devise) for authentication and the [cancancan gem](https://github.com/CanCanCommunity/cancancan) for user permissions.
 
 ###Devise Gem
 
-The Devise Gem is mostly straight forward as long as you don't start messing with things as it gets finicky once you start customizing things. After putting the gem in my gemfile and running `rails generate devise:install` and then `rails generate devise User`I then copied and pasted a couple links and now the app has registrations working. Funny enough, by default devise does not include all fields like name or DOB when running the generator. That has to be put in manually.
+The Devise Gem is mostly straight forward as long as you don't start messing with things as it gets finicky once you start customizing things. After putting the gem in the gemfile and running `rails generate devise:install` and then `rails generate devise User`, it's a couple quick links copy pasted from an older app to get registrations working. Make sure to put `before_action :authenticate_user!` in each contoller to validate sign in.
 
-A quick gotcha I hadn't caught earlier was that when I put in the Devise gem, first name and last name were no longer being saved into the DB. I was getting an unpermitted parameters error when updating and creating
+A quick gotcha I encountered when I put in the Devise gem was first name and last name were no longer being saved into the DB. I was getting an unpermitted parameters error when updating and creating
 ```
 Started PUT "/users" for 127.0.0.1 at 2014-09-14 14:37:44 -0400.Processing by Devise::RegistrationsController#update as HTML.  Parameters: {"utf8"=>"✓", "authenticity_token"=>"smS7azhqJEBQx1bKVIaSNgUyocT8EpYaZi7ZkkAFDMk=", "user"=>{"f_name"=>"Ryan", "l_name"=>"Snodgrass", "dob"=>"2005-06-15", "email"=>"res0428@yahoo.com", "password"=>"[FILTERED]", "password_confirmation"=>"[FILTERED]", "current_password"=>"[FILTERED]"}, "commit"=>"Update"}
 User Load (0.2ms)  SELECT  "users".* FROM "users"  WHERE "users"."id" = 5  ORDER BY "users"."id" ASC LIMIT 1.  User Load (0.2ms)  SELECT  "users".* FROM "users"  WHERE "users"."id" = ? LIMIT 1  [["id", 5]].Unpermitted parameters: f_name, l_name, dob
 ```
 
-Normally a pretty easy error. I might have missed the defined parameters in the users_controller or something simple like that. But - 
+Normally a pretty easy error. I might have missed the defined parameters in the users_controller or something simple like that. But on checking- 
 ```ruby
 #app/controllers/users_controller.rb
 def create
@@ -273,13 +272,13 @@ end
 And the error went away! Problem solved!
 
 ###User Permissions
-For a little bit extra I just want a simple check that only the user that started the club may edit and add members. Normally I would use a foriegn key with a `belongs_to :user` but, that might not work as I'm already associating users with memberships. Instead I'll have a column `created_by` with foriegn keys and upon club creation save the `current_user.id` in the column. Reference that when checking whether `current_user.id == @club.created_by`. I've used the CanCanCan gem before with awesome results but, in this case I feel it would be a little bit of over-kill when in about 3 seconds I can just write a little bit of logic to check user permissions.
+For a little bit extra I just want a simple check that only the user that started the club may edit and add members. Normally I would use a `foriegn_key` with a `belongs_to :user` but, that might not work as I'm already associating users with memberships. Instead I'll have a column `created_by` with foriegn keys and upon club creation save the `current_user.id` in the column. Reference that when checking whether `current_user.id == @club.created_by`. I've used the CanCanCan gem before with awesome results, but in this case I feel it would be a little bit of over-kill when in about 3 seconds I can just write a little bit of logic to check user permissions.
 
 First thing, I need to add a 'created_by' column in the club table.
 ```
 rails g migration AddCreatedByToClubs created_by:integer
 ```
-This creates a migration file and auto generates the add column with what I want in it. Always check anyways and make sure it generated your migration file correctly.
+This creates a migration file and auto generates the `add_column` with what I want in it. Always check anyways and make sure it generated your migration file correctly.
 ```ruby
 class AddCreatedByToClubs < ActiveRecord::Migration
   def change
@@ -292,7 +291,7 @@ Looks good.
 rake db:migrate
 ```
 
-In the club form add in `created_by` as a hidden value. Because the only user able to update the club is the one who created it, I say it's ok to set the current user in the form template.
+In the club form template add in `created_by` as a hidden value. Because the only user able to update the club is the one who created it, I'd say it's ok to set the current user in the form template.
 ```haml
 / app/views/clubs/_form.html.haml
 = f.hidden_field :created_by, :value => current_user.id
@@ -355,7 +354,7 @@ First thing we need to do is add a way to view all users on the view layer. Only
 = link_to 'Back', clubs_path
 ```
 
-Great. Now Let's update the routes and get some nesting going. Because I could eventually want users to invite themselves for whatever reason, I want both clubs and users nesting memberships.
+Great. Now Let's update the routes and get some nesting going. Because I could eventually want users to invite themselves for whatever reason, I need both clubs and users nesting memberships.
 ```ruby
 resources :users, :clubs do
     resources :memberships
@@ -382,4 +381,103 @@ class MembershipsController < ApplicationController
     params.require(:membership).permit(:user_id, :club_id)
   end
 end
+```
+Creating memberships now works.
+
+---
+
+Deletion; however, is going to much different. In fact, deletion is the trickiest part of the whole app because of a glitch I encountered in the debugger gem and by using nested resources.
+
+Because Membership is it's own model, it's easiest to just act on that instead of `@clubs.memberships`/`@user.memberships` querying around activerecord associations like a mad man. First we need to update the `memberships_controller.rb`
+```ruby
+#memberships_controller.rb
+  def destroy
+    @membership = Membership.find(params[:id])
+    if @membership.destroy
+      redirect_to edit_club_path(params[:club_id])
+    else
+      redirect_to :back
+    end
+  end
+```
+
+The trickiest part was getting the view to hit a nested resource controller without adding its own seperate route. 
+
+For example I could have easily acted like every other CRUD and added a specifc route
+```ruby
+# config/routes
+  resources :users, :clubs do
+    resources :memberships
+  end
+#wasn't going to add this
+  resources :memberships
+```
+But I knew there was a solution for this and wanted to challenge myself. It was especially hairy when Debugger was giving me an error when I knew that what I had should be running correctly.  
+```ruby
+Started DELETE "/clubs/10/memberships/10" for 127.0.0.1 at 2014-09-15 17:12:05 -0400
+Processing by MembershipsController#destroy as HTML
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"ZLhJfFY9vuXXuht/gQY9SIgWVXEEzq8rg9rbTsI0WKc=", "commit"=>"Expell Member", "club_id"=>"10", "id"=>"10"}
+  Membership Load (0.5ms)  SELECT  "memberships".* FROM "memberships"  WHERE "memberships"."id" = ? LIMIT 1  [["id", 10]]
+/Users/masterblaster/.rvm/gems/ruby-2.1.1/gems/actionpack-4.1.4/lib/action_controller/metal/implicit_render.rb:5
+default_render unless performed?
+
+[0, 9] in /Users/masterblaster/.rvm/gems/ruby-2.1.1/gems/actionpack-4.1.4/lib/action_controller/metal/implicit_render.rb
+   1  module ActionController
+   2    module ImplicitRender
+   3      def send_action(method, *args)
+   4        ret = super
+=> 5        default_render unless performed?
+   6        ret
+   7      end
+   8
+   9      def default_render(*args)
+```
+Turns out it the error code above is a glitch in Debugger before it hit a missing template error.
+
+The eventual solution was a reworking of the edit page to split users from `@memberships`(current members) and `@users`(non members)
+```haml
+/ app/views/clubs/edit.html.haml
+%h1 Editing club
+= render 'form'
+%ul
+  %h3 List of Current Members
+  - @memberships.each do |m|
+    %li= m.user.f_name + " " + m.user.l_name + ' Current Member'
+    = form_for(m, url: club_membership_path(@club, m), data: { confirm: "Are you sure?" }, :html => {:method => 'delete'}) do |f|
+      = f.hidden_field :club_id, :value => @club.id
+      = f.submit 'Expell Member'
+    
+    %br
+
+  %h3 List of Non Members
+  - @users.each do |u|
+    - unless @club.users.include?(u)
+      %li= u.f_name + " " + u.l_name
+      %h5 Not a Member
+
+      = form_for([@club, @new_membership]) do |f|
+        = f.hidden_field :user_id, :value => u.id
+        = f.hidden_field :club_id, :value => @club.id
+        = f.submit 'Invite Member'
+
+= link_to 'Show', @club
+= link_to 'Back', clubs_path
+```
+The trick to getting the above working was in the `form_for`
+```ruby
+= form_for(m, url: club_membership_path(@club, m), data: { confirm: "Are you sure?" }, :html => {:method => 'delete'}) do |f|
+```
+Because the controllers were nesting routes `club_membership_path()` was expecting two arguments - the ids for `@club` and the membership in question.
+
+I threw in the confirmation before deletion for good measure.
+Extra
+===
+
+I put in some logic to have an always present home link, but not displayed when already at home(root.) By having it in the layout/application after the `= yield` ensures it displays on everypage keeping things DRY.
+```haml
+/ app/views/layouts/application.html.haml
+= yield
+%br
+- unless request.env['PATH_INFO']  == "/"
+  = link_to "Go Back Home", root_path, :class => 'navbar-link'
 ```
