@@ -38,6 +38,7 @@ Installation
 3. `rake db:setup`
 4. localhost:3000 and away you go!
     -  Try signing in as clark@kent.com password 'superman'
+    -  Check the `seed.rb` file for a full list of superheros
 
 Development
 ===
@@ -88,6 +89,7 @@ end
 ####Scaffolding
 I ran a couple of scaffolding commands that got Users and Clubs to CRUD(Create, Read, Update, Delete.) I normally don't use scaffolding as I prefer to know what goes into my app, but in the interest of time I let it slide. Problem is that scaffolding generates alot of stuff you dont need. Let's take clubs for example
 ```ruby
+# app/controllers/clubs_controller.rb
 class ClubsController < ApplicationController
   before_action :set_club, only: [:show, :edit, :update, :destroy]
 
@@ -169,6 +171,7 @@ Now, actually most of that stuff is pretty good. I actually like the `set_club` 
 What I don't like, or need, is all those json responses. I believe that eventually all apps are going over to a rails/django/node back-end and a separate angular/backbone front-end. But not yet. Right now I can clean up that scaffolding for the `create`, `update`, and `destroy` methods by simply removing the json responses.
 
 ```ruby
+# app/controllers/clubs_controller.rb
 def create
   @club = Club.new(club_params)
   if @club.save
@@ -229,7 +232,7 @@ Over the weekend on my own time I decided to keep adding. I wanted users to sign
 
 ###Devise Gem
 
-The Devise Gem is mostly straight forward as long as you don't start messing with things as it gets finicky once you start customizing things. After putting the gem in the gemfile and running 
+The Devise Gem is mostly straight forward as long as you don't start customizing things. After putting the gem in the gemfile and running 
 ```
 rails generate devise:install
 ``` 
@@ -295,6 +298,7 @@ rails g migration AddCreatedByToClubs created_by:integer
 ```
 This creates a migration file and auto generates the `add_column` with what I want in it. Always check anyways and make sure it generated your migration file correctly.
 ```ruby
+# db/migrate/20140914050356_add_created_by_to_clubs.rb
 class AddCreatedByToClubs < ActiveRecord::Migration
   def change
     add_column :clubs, :created_by, :integer
@@ -371,6 +375,7 @@ First thing we need to do is add a way to view all users on the view layer. Only
 
 Great. Now Let's update the routes and get some nesting going. Because I could eventually want users to invite themselves for whatever reason, I need both clubs and users nesting memberships.
 ```ruby
+# config/routes.rb
 resources :users, :clubs do
     resources :memberships
 end
@@ -425,14 +430,14 @@ The trickiest part was getting the view to hit a nested resource controller with
 
 For example I could have easily acted like every other CRUD and added a specific route
 ```ruby
-# config/routes
+# config/routes.rb
   resources :users, :clubs do
     resources :memberships
   end
 #wasn't going to add this
   resources :memberships
 ```
-But I knew there was a solution for this and wanted to challenge myself. It was especially hairy when Debugger was giving me an error when I knew that what I had should be running correctly.  
+But I knew there was a solution for this and wanted to challenge myself. It was especially hairy when Debugger was giving me an error when I knew that what I had should be running correctly. I thought Debugger was hitting some crazy error in rails render configuration
 ```ruby
 Started DELETE "/clubs/10/memberships/10" for 127.0.0.1 at 2014-09-15 17:12:05 -0400
 Processing by MembershipsController#destroy as HTML
@@ -529,6 +534,7 @@ I put in some logic to have an always present home link, but not displayed when 
 Thanks to [xyzpup.com](http://www.xyzpub.com/en/ruby-on-rails/3.2/seed_rb.html) for a cleaner way to seed a DB with arrays.
 
 ```ruby
+# db/seeds.rb
 user_list = [
   [ "Clark", "Kent", "1938-04-18", "clark@kent.com", "superman", "superman"],
   [ "Bruce", "Wayne", "1939-05-12", "bruce@wayne.com", "thedarkknight", "thedarkknight"],
@@ -541,6 +547,7 @@ end
 ```
 A quick gotcha- define the `created_by:` in the `Club` by a hard coded expected id number(like superman is always created first so his id would be always be expected to be 1.) However, I've found this leads to errors when future versions no longer have the same IDs. Finding the User's id organically by name with `User.find_by_f_name("Clark").id` ensures this does not happen.
 ```ruby
+# db/seeds.rb
 club_list = [
   ["Justice League", "Super Sweet", true, User.find_by_f_name("Clark").id],
   ["Guardians of the Galaxy", "Super Awesome", false, User.find_by_f_name("Peter").id],
@@ -571,15 +578,21 @@ User exists? What? I specifically dropped the whole database with `rake db:reset
 1 error prohibited this user from being saved:
 Password is too short (minimum is 8 characters)
 ```
-Oh. Duh. Here is a great example of when the console doesn't tell you everything. Changing the characters around to have longer alter egos passwords and everything ran smoothly!
+Oh. Duh. Here is a great example of when the console doesn't tell you everything. Changing the characters around to have longer alter ego passwords and everything ran smoothly!
 
 Later Phases
 ---
 You'll notice that you can expel yourself from your own club. Some quick logic should fix that.
 
+There's a lot of logic being run in the view. Refactor to move that into the controller and eventually into the model.
+
+I didn't get to testing.
+
+There are a couple gems out there for client side verification.
+
 The show page for clubs should show a list of current members.
 
 Obviously the default styling isn't pretty to look at. A quick bootstrap/foundation template would do nicely.
 
-Thanks
+Thanks for Reading!
 ===
