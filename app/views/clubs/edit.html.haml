@@ -4,7 +4,7 @@
   %h3 List of Current Members
   - @memberships.each do |m|
     %li= m.user.f_name + " " + m.user.l_name + ' Current Member'
-    = form_for(m, url: club_membership_path(@club, m), :html => {:method => 'delete'}) do |f|
+    = form_for(m, url: club_membership_path(@club, m), data: { confirm: "Are you sure?" }, :html => {:method => 'delete'}) do |f|
       = f.hidden_field :club_id, :value => @club.id
       = f.submit 'Expell Member'
     
