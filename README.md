@@ -37,7 +37,7 @@ Installation
 2. `bundle install`
 3. `rake db:setup`
 4. localhost:3000 and away you go!
-    -  Try sigining in as clark@kent.com passowrd 'superman'
+    -  Try signing in as clark@kent.com password 'superman'
 
 Development
 ===
@@ -48,7 +48,7 @@ During Code Test
 I was given a short hour to get as far as I could.
 
 ####Setup
-Initially I set up a basic schmema
+Initially I set up a basic schema
 ```ruby
   create_table "clubs", force: true do |t|
     t.string  "name"
@@ -67,7 +67,7 @@ Initially I set up a basic schmema
     t.date     "dob"
   end
 ```
-And activerecord associations
+And ActiveRecord associations
 ```ruby
 class Club < ActiveRecord::Base
   has_many :memberships
@@ -166,7 +166,7 @@ end
 ```
 Now, actually most of that stuff is pretty good. I actually like the `set_club` method. It defines the `@club = Club.find(params[:id])` variable once and then calls it before the `edit`, `show`, `update`, and `delete` pages. I have a lot of apps where I'm writing that line over and over- I might just start using that.
 
-What I don't like, or need, is all those json responses. I believe that eventually all apps are going over to a rails/django/node back-end and a seperate angular/backbone front-end. But not yet. Right now I can clean up that scaffolding for the `create`, `update`, and `destroy` methods by simply removing the json responses.
+What I don't like, or need, is all those json responses. I believe that eventually all apps are going over to a rails/django/node back-end and a separate angular/backbone front-end. But not yet. Right now I can clean up that scaffolding for the `create`, `update`, and `destroy` methods by simply removing the json responses.
 
 ```ruby
 def create
@@ -237,11 +237,11 @@ and then
 ```
 rails generate devise User
 ```
-It's a couple quick links copy pasted from an older app to get registrations working. Make sure to put `before_action :authenticate_user!` in each contoller to validate sign in.
+It's a couple quick links copy pasted from an older app to get registrations working. Make sure to put `before_action :authenticate_user!` in each controller to validate sign in.
 
 ---
 
-A quick gotcha I encountered when I put in the Devise gem was `f_name` and `l_name` were no longer being saved into the DB. I was getting an unpermitted parameters error when updating and creating
+A quick gotcha I encountered when I put in the Devise gem was `f_name` and `l_name` were no longer being saved into the DB. I was getting an un-permitted parameters error when updating and creating
 ```
 Started PUT "/users" for 127.0.0.1 at 2014-09-14 14:37:44 -0400.Processing by Devise::RegistrationsController#update as HTML.  Parameters: {"utf8"=>"✓", "authenticity_token"=>"smS7azhqJEBQx1bKVIaSNgUyocT8EpYaZi7ZkkAFDMk=", "user"=>{"f_name"=>"Ryan", "l_name"=>"Snodgrass", "dob"=>"2005-06-15", "email"=>"res0428@yahoo.com", "password"=>"[FILTERED]", "password_confirmation"=>"[FILTERED]", "current_password"=>"[FILTERED]"}, "commit"=>"Update"}
 User Load (0.2ms)  SELECT  "users".* FROM "users"  WHERE "users"."id" = 5  ORDER BY "users"."id" ASC LIMIT 1.  User Load (0.2ms)  SELECT  "users".* FROM "users"  WHERE "users"."id" = ? LIMIT 1  [["id", 5]].Unpermitted parameters: f_name, l_name, dob
@@ -267,7 +267,7 @@ def user_params
   params.require(:user).permit(:f_name, :l_name, :dob)
 end
 ```
-Nope all there. Strangely all the unpermitted items were there, but none of the `password` or `email` that _IS_ going through. Even stranger - debugger is completely being ignored. Which tells me that the UserController isn't even being hit.
+Nope all there. Strangely all the un-permitted items were there, but none of the `password` or `email` that _IS_ going through. Even stranger - debugger is completely being ignored. Which tells me that the UserController isn't even being hit.
 
 If we look closely at the console output we can see that it tells us `Processing by Devise::RegistrationsController#update` is where it is actually processing. But where is that? The source files do not contain that specific controller. 
 
@@ -287,7 +287,7 @@ end
 And the error went away! Problem solved!
 
 ###User Permissions
-For a little bit extra I just want a simple check that only the user that started the club may edit and add members. Normally I would use a `foriegn_key` with a `belongs_to :user` but, that might not work as I'm already associating users with memberships. Instead I'll have a column `created_by` with foriegn keys and upon club creation save the `current_user.id` in the column. Reference that when checking whether `current_user.id == @club.created_by`. I've used the CanCanCan gem before with awesome results, but in this case I feel it would be a little bit of over-kill when in about 3 seconds I can just write a little bit of logic to check user permissions.
+For a little bit extra I just want a simple check that only the user that started the club may edit and add members. Normally I would use a `foreign_key` with a `belongs_to :user` but, that might not work as I'm already associating users with memberships. Instead I'll have a column `created_by` with foreign keys and upon club creation save the `current_user.id` in the column. Reference that when checking whether `current_user.id == @club.created_by`. I've used the CanCanCan gem before with awesome results, but in this case I feel it would be a little bit of over-kill when in about 3 seconds I can just write a little bit of logic to check user permissions.
 
 First thing, I need to add a 'created_by' column in the club table.
 ```
@@ -344,7 +344,7 @@ While we're here let's fix the input field for `accepting` to something more acc
 
 ###Memberships
 
-Now onto the meat of the app. Getting users to associate with clubs. In a real app this would probably be a very involved feature. The club owner could search for users and send a notification to the prospect's email with the invitation. Meanwhile the prospect could shop for other clubs and then send a notification to the club owner for an invitation. There could be growler notifications and popups and recommendations and that's all very good, but this could go on forever. For now, I just want admin users to invite/expell people.
+Now onto the meat of the app. Getting users to associate with clubs. In a real app this would probably be a very involved feature. The club owner could search for users and send a notification to the prospect's email with the invitation. Meanwhile the prospect could shop for other clubs and then send a notification to the club owner for an invitation. There could be growler notifications and popups and recommendations and that's all very good, but this could go on forever. For now, I just want admin users to invite/expel people.
 
 First thing we need to do is add a way to view all users on the view layer. Only the club administrator can make changes so I'll simply put the invitation function inside the edit page. For organization they're being listed as two types- those that are members, and those that are not.
 ```haml
@@ -408,7 +408,7 @@ Creating memberships now works.
 
 Deletion; however, is going to be much different. In fact, deletion is the trickiest part of the whole app.
 
-Because Membership is it's own model, it's easiest to just act on that instead of `@clubs.memberships`/`@user.memberships` querying around activerecord associations like a mad man. First we need to update the `memberships_controller.rb`
+Because Membership is it's own model, it's easiest to just act on that instead of `@clubs.memberships`/`@user.memberships` querying around ActiveRecord associations like a mad man. First we need to update the `memberships_controller.rb`
 ```ruby
 # app/controllers/memberships_controller.rb
   def destroy
@@ -421,9 +421,9 @@ Because Membership is it's own model, it's easiest to just act on that instead o
   end
 ```
 
-The trickiest part was getting the view to hit a nested resource controller without adding its own seperate route. 
+The trickiest part was getting the view to hit a nested resource controller without adding its own separate route. 
 
-For example I could have easily acted like every other CRUD and added a specifc route
+For example I could have easily acted like every other CRUD and added a specific route
 ```ruby
 # config/routes
   resources :users, :clubs do
@@ -475,7 +475,7 @@ And the eventual solution in the view
     %li= m.user.f_name + " " + m.user.l_name + ' Current Member'
     = form_for(m, url: club_membership_path(@club, m), data: { confirm: "Are you sure?" }, :html => {:method => 'delete'}) do |f|
       = f.hidden_field :club_id, :value => @club.id
-      = f.submit 'Expell Member'
+      = f.submit 'Expel Member'
     
     %br
 
@@ -509,14 +509,14 @@ HURRAY THE APP IS NOW FULLY FUNCTIONAL!
 - I have users signing in with full registration. 
 - They can CRUD clubs. 
 - The creator of the club becomes admin
-- Admin can invite and expell members
+- Admin can invite and expel members
 
 Not bad for a weekend app!
 
 Extra
 ===
 
-I put in some logic to have an always present home link, but not displayed when already at home(root.) By having it in the layout/application after the `= yield` ensures it displays on everypage keeping things DRY.
+I put in some logic to have an always present home link, but not displayed when already at home(root.) By having it in the layout/application after the `= yield` ensures it displays on every page keeping things DRY.
 ```haml
 / app/views/layouts/application.html.haml
 = yield
@@ -543,7 +543,7 @@ A quick gotcha- define the `created_by:` in the `Club` by a hard coded expected 
 ```ruby
 club_list = [
   ["Justice League", "Super Sweet", true, User.find_by_f_name("Clark").id],
-  ["Gaurdians of the Galaxy", "Super Awesome", false, User.find_by_f_name("Peter").id],
+  ["Guardians of the Galaxy", "Super Awesome", false, User.find_by_f_name("Peter").id],
   ["The Avengers", "Old School", true, User.find_by_f_name("Steve").id]
 ]
 
@@ -565,7 +565,7 @@ At first I tried having a couple characters with passwords like "batman" and "fl
 
  => #<User id: nil, f_name: "Bruce", l_name: "Wayne", dob: "1939-05-12", email: "b@w.com", encrypted_password: "$2a$10$ke4BwF.GxExazWmcB9F06OTHBXHrAVemISTPPJCkCcb...", reset_password_token: nil, reset_password_sent_at: nil, remember_created_at: nil, sign_in_count: 0, current_sign_in_at: nil, last_sign_in_at: nil, current_sign_in_ip: nil, last_sign_in_ip: nil>
 ```
-User exists? What? I specifically dropped the whole database with `rake db:reset`, then asked to clean it again with `User.delete_all`. Searching for "Bruce" or `User.all` still reveals he's not in the DB. I tried changing the name, email, all the fields. Eventually I tried sigining up in the actual browser.
+User exists? What? I specifically dropped the whole database with `rake db:reset`, then asked to clean it again with `User.delete_all`. Searching for "Bruce" or `User.all` still reveals he's not in the DB. I tried changing the name, email, all the fields. Eventually I tried signing up in the actual browser.
 
 ```
 1 error prohibited this user from being saved:
@@ -575,8 +575,8 @@ Oh. Duh. Here is a great example of when the console doesn't tell you everything
 
 Later Phases
 ---
-You'll notice that you can expell youself from your own club. Some quick logic should fix that.
+You'll notice that you can expel yourself from your own club. Some quick logic should fix that.
 
 The show page for clubs should show a list of current members.
 
-Obviously the default stylying isn't pretty to look at. A quick bootstrap/foundation template would do nicely.
+Obviously the default styling isn't pretty to look at. A quick bootstrap/foundation template would do nicely.
