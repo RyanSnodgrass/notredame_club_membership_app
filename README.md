@@ -580,6 +580,8 @@ Password is too short (minimum is 8 characters)
 ```
 Oh. Duh. Here is a great example of when the console doesn't tell you everything. Changing the characters around to have longer alter ego passwords and everything ran smoothly!
 
+PHASE 1 FINISHED!
+===
 Later Phases
 ---
 You'll notice that you can expel yourself from your own club. Some quick logic should fix that.
@@ -594,5 +596,4 @@ The show page for clubs should show a list of current members.
 
 Obviously the default styling isn't pretty to look at. A quick bootstrap/foundation template would do nicely.
 
-Thanks for Reading!
-===
+##Thanks for Reading!
