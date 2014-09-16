@@ -526,6 +526,32 @@ I put in some logic to have an always present home link, but not displayed when 
 ```
 ###Seeding the DB
 
+Thanks to [xyzpup.com](http://www.xyzpub.com/en/ruby-on-rails/3.2/seed_rb.html) for a cleaner way to seed a DB with arrays.
+
+```ruby
+user_list = [
+  [ "Clark", "Kent", "1938-04-18", "clark@kent.com", "superman", "superman"],
+  [ "Bruce", "Wayne", "1939-05-12", "bruce@wayne.com", "thedarkknight", "thedarkknight"],
+  [ "Steve", "Rodgers", "1941-03-16", "steve@rodgers.com", "captainamerica", "captainamerica"]
+]
+
+user_list.each do |fname, lname, bday, email, alter, ego|
+  User.create(f_name: fname, l_name: lname, dob: bday, email: email, password: alter, password_confirmation: ego)
+end
+```
+A quick gotcha- define the `created_by:` in the `Club` by a hard coded expected id number(like superman is always created first so his id would be always be expected to be 1.) However, I've found this leads to errors when future versions no longer have the same IDs. Finding the User's id organically by name with `User.find_by_f_name("Clark").id` ensures this does not happen.
+```ruby
+club_list = [
+  ["Justice League", "Super Sweet", true, User.find_by_f_name("Clark").id],
+  ["Gaurdians of the Galaxy", "Super Awesome", false, User.find_by_f_name("Peter").id],
+  ["The Avengers", "Old School", true, User.find_by_f_name("Steve").id]
+]
+
+club_list.each do |name, description, accepting, creator|
+  Club.create(name: name, description: description, accepting: accepting, created_by: creator)
+end
+```
+At first I tried having a couple characters with passwords like "batman" and "flash" which weren't being saved. `rake db:seed` ran without errors, but was missing several characters. I tried creating one in the console
 ```ruby
 2.1.1 :002 > User.create(f_name: "Bruce", l_name: "Wayne", dob: "1939-05-12", email: "b@w.com", password: "batman", password_confirmation: "batman")
   
