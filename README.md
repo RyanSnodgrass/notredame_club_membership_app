@@ -580,19 +580,23 @@ Password is too short (minimum is 8 characters)
 ```
 Oh. Duh. Here is a great example of when the console doesn't tell you everything. Changing the characters around to have longer alter ego passwords and everything ran smoothly!
 
+PHASE 1 FINISHED!
+===
 Later Phases
 ---
-You'll notice that you can expel yourself from your own club. Some quick logic should fix that.
 
-There's a lot of logic being run in the view. Refactor to move that into the controller and eventually into the model.
+I have a list of things if I had more time, I'd like to get done. 
 
-I didn't get to testing.
+- You'll notice that you can expel yourself from your own club. Some quick logic should fix that.
 
-There are a couple gems out there for client side verification.
+- There's a lot of logic being run in the view. Refactor to move that into the controller and eventually into the model.
 
-The show page for clubs should show a list of current members.
+- I didn't get to testing.
 
-Obviously the default styling isn't pretty to look at. A quick bootstrap/foundation template would do nicely.
+- There are a couple gems out there for client side verification.
 
-Thanks for Reading!
-===
+- The show page for clubs should show a list of current members.
+
+- Obviously the default styling isn't pretty to look at. A quick bootstrap/foundation template would do nicely.
+
+##Thanks for Reading!
