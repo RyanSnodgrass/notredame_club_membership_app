@@ -1,6 +1,6 @@
 class ClubsController < ApplicationController
-  before_action :authenticate_user!, :set_club, only: [:show, :edit, :update, :destroy]
-
+  before_action :set_club, only: [:show, :edit, :update, :destroy]
+  before_action :authenticate_user!
   # GET /clubs
   # GET /clubs.json
   def index

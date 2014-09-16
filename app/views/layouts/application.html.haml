@@ -42,3 +42,6 @@
       /   = link_to "Sign up", new_user_registration_path, :class => 'navbar-link'
       /   = link_to "Login", new_user_session_path, :class => 'navbar-link'
     = yield
+    %br
+    - unless request.env['PATH_INFO']  == "/"
+      = link_to "Go Back Home", root_path, :class => 'navbar-link'
