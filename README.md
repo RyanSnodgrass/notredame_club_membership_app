@@ -357,7 +357,7 @@ First thing we need to do is add a way to view all users on the view layer. Only
   = u.l_name
   - if @club.memberships.include?(u)
     %h5 Current Member
-    / logic to expell member.
+    / logic to expel member.
   - else
     %h5 Not a Member
     = form_for([@club, @new_membership]) do |f|
@@ -436,7 +436,7 @@ But I knew there was a solution for this and wanted to challenge myself. It was 
 ```ruby
 Started DELETE "/clubs/10/memberships/10" for 127.0.0.1 at 2014-09-15 17:12:05 -0400
 Processing by MembershipsController#destroy as HTML
-  Parameters: {"utf8"=>"✓", "authenticity_token"=>"ZLhJfFY9vuXXuht/gQY9SIgWVXEEzq8rg9rbTsI0WKc=", "commit"=>"Expell Member", "club_id"=>"10", "id"=>"10"}
+  Parameters: {"utf8"=>"✓", "authenticity_token"=>"ZLhJfFY9vuXXuht/gQY9SIgWVXEEzq8rg9rbTsI0WKc=", "commit"=>"Expel Member", "club_id"=>"10", "id"=>"10"}
   Membership Load (0.5ms)  SELECT  "memberships".* FROM "memberships"  WHERE "memberships"."id" = ? LIMIT 1  [["id", 10]]
 /Users/masterblaster/.rvm/gems/ruby-2.1.1/gems/actionpack-4.1.4/lib/action_controller/metal/implicit_render.rb:5
 default_render unless performed?
@@ -580,3 +580,6 @@ You'll notice that you can expel yourself from your own club. Some quick logic s
 The show page for clubs should show a list of current members.
 
 Obviously the default styling isn't pretty to look at. A quick bootstrap/foundation template would do nicely.
+
+Thanks
+===
