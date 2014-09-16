@@ -587,16 +587,16 @@ Later Phases
 
 I have a list of things if I had more time, I'd like to get done. 
 
-You'll notice that you can expel yourself from your own club. Some quick logic should fix that.
+- You'll notice that you can expel yourself from your own club. Some quick logic should fix that.
 
-There's a lot of logic being run in the view. Refactor to move that into the controller and eventually into the model.
+- There's a lot of logic being run in the view. Refactor to move that into the controller and eventually into the model.
 
-I didn't get to testing.
+- I didn't get to testing.
 
-There are a couple gems out there for client side verification.
+- There are a couple gems out there for client side verification.
 
-The show page for clubs should show a list of current members.
+- The show page for clubs should show a list of current members.
 
-Obviously the default styling isn't pretty to look at. A quick bootstrap/foundation template would do nicely.
+- Obviously the default styling isn't pretty to look at. A quick bootstrap/foundation template would do nicely.
 
 ##Thanks for Reading!
