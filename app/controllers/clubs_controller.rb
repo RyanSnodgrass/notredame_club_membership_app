@@ -1,6 +1,6 @@
 class ClubsController < ApplicationController
   before_action :set_club, only: [:show, :edit, :update, :destroy]
-
+  before_action :authenticate_user!
   # GET /clubs
   # GET /clubs.json
   def index
@@ -19,35 +19,29 @@ class ClubsController < ApplicationController
 
   # GET /clubs/1/edit
   def edit
+    @users = User.all
+    @memberships = @club.memberships
+    @new_membership = Membership.new
   end
 
   # POST /clubs
   # POST /clubs.json
   def create
     @club = Club.new(club_params)
-
-    respond_to do |format|
-      if @club.save
-        format.html { redirect_to @club, notice: 'Club was successfully created.' }
-        format.json { render :show, status: :created, location: @club }
-      else
-        format.html { render :new }
-        format.json { render json: @club.errors, status: :unprocessable_entity }
-      end
+    if @club.save
+      redirect_to @club, notice: 'Club was successfully created.'
+    else
+      render :new
     end
   end
 
   # PATCH/PUT /clubs/1
   # PATCH/PUT /clubs/1.json
   def update
-    respond_to do |format|
-      if @club.update(club_params)
-        format.html { redirect_to @club, notice: 'Club was successfully updated.' }
-        format.json { render :show, status: :ok, location: @club }
-      else
-        format.html { render :edit }
-        format.json { render json: @club.errors, status: :unprocessable_entity }
-      end
+    if @club.update(club_params)
+      redirect_to @club, notice: 'Club was successfully updated.'
+    else
+      render :edit        
     end
   end
 
@@ -55,10 +49,7 @@ class ClubsController < ApplicationController
   # DELETE /clubs/1.json
   def destroy
     @club.destroy
-    respond_to do |format|
-      format.html { redirect_to clubs_url, notice: 'Club was successfully destroyed.' }
-      format.json { head :no_content }
-    end
+    redirect_to clubs_url, notice: 'Club was successfully destroyed.'
   end
 
   private
