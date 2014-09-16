@@ -8,7 +8,7 @@ Rails.application.routes.draw do
   resources :users, :clubs do
     resources :memberships
   end
-  resources :memberships
+
 
 
     
