@@ -35,9 +35,9 @@ Installation
 
 1. Clone to local machine
 2. `bundle install`
-3. `rake db:create`
-4. `rake db:migrate`
-5. localhost:3000 and away you go!
+3. `rake db:setup`
+4. localhost:3000 and away you go!
+    -  Try sigining in as clark@kent.com passowrd 'superman'
 
 Development
 ===
@@ -195,7 +195,12 @@ Much prettier.
 
 
 ####Verification of Uniqueness
-The next thing I tackled in that hour was verification of unique users. I had found that I could get all fields unique apart from each other. But, that's not very useful as there are of course people with similar first names and so on. I used the `validates :l_name, :uniqueness => { :scope => :f_name, :case_sensitive => false }` method to find uniqueness on two fields. _Still working on 3._
+The next thing I tackled in that hour was verification of unique users. I had found that I could get all fields unique apart from each other. But, that's not very useful as there are of course people with similar first names and so on. Thanks to [stack overflow](http://stackoverflow.com/questions/3276110/rails-3-validation-on-uniqueness-on-multiple-attributes)
+```ruby
+# app/models/user.rb
+  validates :l_name, :uniqueness => { :scope => [:f_name, :dob], :case_sensitive => false }
+  
+```
 
 ####Membership Association
 Next task was to get the Membership table working.
@@ -224,7 +229,17 @@ Over the weekend on my own time I decided to keep adding. I wanted users to sign
 
 ###Devise Gem
 
-The Devise Gem is mostly straight forward as long as you don't start messing with things as it gets finicky once you start customizing things. After putting the gem in the gemfile and running `rails generate devise:install` and then `rails generate devise User`, it's a couple quick links copy pasted from an older app to get registrations working. Make sure to put `before_action :authenticate_user!` in each contoller to validate sign in.
+The Devise Gem is mostly straight forward as long as you don't start messing with things as it gets finicky once you start customizing things. After putting the gem in the gemfile and running 
+```
+rails generate devise:install
+``` 
+and then 
+```
+rails generate devise User
+```
+It's a couple quick links copy pasted from an older app to get registrations working. Make sure to put `before_action :authenticate_user!` in each contoller to validate sign in.
+
+---
 
 A quick gotcha I encountered when I put in the Devise gem was `f_name` and `l_name` were no longer being saved into the DB. I was getting an unpermitted parameters error when updating and creating
 ```
@@ -487,6 +502,7 @@ Because the controllers were nesting routes `club_membership_path()` was expecti
 I threw in the confirmation before deletion for good measure.
 
 ---
+
 Finished
 ---
 HURRAY THE APP IS NOW FULLY FUNCTIONAL! 
@@ -508,3 +524,33 @@ I put in some logic to have an always present home link, but not displayed when 
 - unless request.env['PATH_INFO']  == "/"
   = link_to "Go Back Home", root_path, :class => 'navbar-link'
 ```
+###Seeding the DB
+
+```ruby
+2.1.1 :002 > User.create(f_name: "Bruce", l_name: "Wayne", dob: "1939-05-12", email: "b@w.com", password: "batman", password_confirmation: "batman")
+  
+   (0.2ms)  begin transaction
+
+  User Exists (0.2ms)  SELECT  1 AS one FROM "users"  WHERE "users"."email" = 'b@w.com' LIMIT 1
+
+  User Exists (0.1ms)  SELECT  1 AS one FROM "users"  WHERE (LOWER("users"."l_name") = LOWER('Wayne') AND "users"."f_name" = 'Bruce' AND "users"."dob" = '1939-05-12') LIMIT 1
+
+   (0.1ms)  rollback transaction
+
+ => #<User id: nil, f_name: "Bruce", l_name: "Wayne", dob: "1939-05-12", email: "b@w.com", encrypted_password: "$2a$10$ke4BwF.GxExazWmcB9F06OTHBXHrAVemISTPPJCkCcb...", reset_password_token: nil, reset_password_sent_at: nil, remember_created_at: nil, sign_in_count: 0, current_sign_in_at: nil, last_sign_in_at: nil, current_sign_in_ip: nil, last_sign_in_ip: nil>
+```
+User exists? What? I specifically dropped the whole database with `rake db:reset`, then asked to clean it again with `User.delete_all`. Searching for "Bruce" or `User.all` still reveals he's not in the DB. I tried changing the name, email, all the fields. Eventually I tried sigining up in the actual browser.
+
+```
+1 error prohibited this user from being saved:
+Password is too short (minimum is 8 characters)
+```
+Oh. Duh. Here is a great example of when the console doesn't tell you everything. Changing the characters around to have longer alter egos passwords and everything ran smoothly!
+
+Later Phases
+---
+You'll notice that you can expell youself from your own club. Some quick logic should fix that.
+
+The show page for clubs should show a list of current members.
+
+Obviously the default stylying isn't pretty to look at. A quick bootstrap/foundation template would do nicely.

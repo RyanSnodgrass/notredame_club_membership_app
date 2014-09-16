@@ -5,7 +5,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable
   has_many :memberships
   has_many :clubs, through: :memberships
-  validates :l_name, :uniqueness => { :scope => :f_name, :case_sensitive => false }
+  validates :l_name, :uniqueness => { :scope => [:f_name, :dob], :case_sensitive => false }
 
-  validates :dob, uniqueness: true
+  # validates :dob, uniqueness: true
 end
