@@ -10,7 +10,7 @@ class MembershipsController < ApplicationController
     if @new_membership.save
       redirect_to edit_club_path(params[:club_id])
     else
-      redirect_to :back
+      redirect_to :back, notice: 'Whoopsies'
     end
   end
     # if @club.memberships << @user

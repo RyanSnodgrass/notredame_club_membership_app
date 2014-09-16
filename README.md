@@ -220,13 +220,13 @@ I see that calling through clubs to users and vice versa will not error out. Whi
 
 Additions
 ---
-Over the weekend on my own time I decided to keep adding. I wanted users to sign up and be able to create a club. Only the user that creates the club can make changes. I will be using the [devise gem](https://github.com/plataformatec/devise) for authentication and the [cancancan gem](https://github.com/CanCanCommunity/cancancan) for user permissions.
+Over the weekend on my own time I decided to keep adding. I wanted users to sign up and be able to create a club. Only the user that creates the club can make changes. I will be using the [devise gem](https://github.com/plataformatec/devise) for authentication.
 
 ###Devise Gem
 
 The Devise Gem is mostly straight forward as long as you don't start messing with things as it gets finicky once you start customizing things. After putting the gem in the gemfile and running `rails generate devise:install` and then `rails generate devise User`, it's a couple quick links copy pasted from an older app to get registrations working. Make sure to put `before_action :authenticate_user!` in each contoller to validate sign in.
 
-A quick gotcha I encountered when I put in the Devise gem was first name and last name were no longer being saved into the DB. I was getting an unpermitted parameters error when updating and creating
+A quick gotcha I encountered when I put in the Devise gem was `f_name` and `l_name` were no longer being saved into the DB. I was getting an unpermitted parameters error when updating and creating
 ```
 Started PUT "/users" for 127.0.0.1 at 2014-09-14 14:37:44 -0400.Processing by Devise::RegistrationsController#update as HTML.  Parameters: {"utf8"=>"✓", "authenticity_token"=>"smS7azhqJEBQx1bKVIaSNgUyocT8EpYaZi7ZkkAFDMk=", "user"=>{"f_name"=>"Ryan", "l_name"=>"Snodgrass", "dob"=>"2005-06-15", "email"=>"res0428@yahoo.com", "password"=>"[FILTERED]", "password_confirmation"=>"[FILTERED]", "current_password"=>"[FILTERED]"}, "commit"=>"Update"}
 User Load (0.2ms)  SELECT  "users".* FROM "users"  WHERE "users"."id" = 5  ORDER BY "users"."id" ASC LIMIT 1.  User Load (0.2ms)  SELECT  "users".* FROM "users"  WHERE "users"."id" = ? LIMIT 1  [["id", 5]].Unpermitted parameters: f_name, l_name, dob
@@ -364,8 +364,13 @@ Good stuff.
 
 Now we need to update the membership controller.
 ```ruby
+# app/controllers/clubs_controller.rb
 class MembershipsController < ApplicationController
-
+  def edit
+    @users = User.all
+    @new_membership = Membership.new
+  end
+  
   def create
     @new_membership = Membership.new(membership_params)
     if @new_membership.save
@@ -386,17 +391,17 @@ Creating memberships now works.
 
 ---
 
-Deletion; however, is going to much different. In fact, deletion is the trickiest part of the whole app because of a glitch I encountered in the debugger gem and by using nested resources.
+Deletion; however, is going to be much different. In fact, deletion is the trickiest part of the whole app.
 
 Because Membership is it's own model, it's easiest to just act on that instead of `@clubs.memberships`/`@user.memberships` querying around activerecord associations like a mad man. First we need to update the `memberships_controller.rb`
 ```ruby
-#memberships_controller.rb
+# app/controllers/memberships_controller.rb
   def destroy
     @membership = Membership.find(params[:id])
     if @membership.destroy
       redirect_to edit_club_path(params[:club_id])
     else
-      redirect_to :back
+      redirect_to :back, notice: 'Whoopsies'
     end
   end
 ```
@@ -434,7 +439,17 @@ default_render unless performed?
 ```
 Turns out it the error code above is a glitch in Debugger before it hit a missing template error.
 
-The eventual solution was a reworking of the edit page to split users from `@memberships`(current members) and `@users`(non members)
+The eventual solution was a reworking of the edit page to split users from `@memberships`(current members) and `@users`(non members.) First update the `clubs_controller`
+```ruby
+# app/controllers/clubs_controller.rb
+  def edit
+    @users = User.all
+    @memberships = @club.memberships
+    @new_membership = Membership.new
+  end
+  
+```
+And the eventual solution in the view
 ```haml
 / app/views/clubs/edit.html.haml
 %h1 Editing club
@@ -470,6 +485,18 @@ The trick to getting the above working was in the `form_for`
 Because the controllers were nesting routes `club_membership_path()` was expecting two arguments - the ids for `@club` and the membership in question.
 
 I threw in the confirmation before deletion for good measure.
+
+---
+Finished
+---
+HURRAY THE APP IS NOW FULLY FUNCTIONAL! 
+- I have users signing in with full registration. 
+- They can CRUD clubs. 
+- The creator of the club becomes admin
+- Admin can invite and expell members
+
+Not bad for a weekend app!
+
 Extra
 ===
 
